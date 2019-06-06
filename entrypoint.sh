@@ -12,12 +12,15 @@ if [ -z ${FTP_USERNAME+x} ]; then
   exit 1
 fi
 
+echo "Setting up ftp user ${FTP_USERNAME}"
 pure-pw useradd \
       $FTP_USERNAME -f /etc/pure-ftpd/passwd/pureftpd.passwd \
      -m -u ftpuser -d /home/ftpusers/data > /dev/null << EOF
 $FTP_PASSWORD
 $FTP_PASSWORD
 EOF
+
+chown ftpuser /home/ftpusers/data
 
 PORT_RANGE=${PORT_RANGE:-30000:31000}
 GUESSED_IP=$(ip addr | grep 'state UP' -A2 | head -n3 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
@@ -27,4 +30,4 @@ echo "Running run.sh..."
 ./run.sh -c 1000 -C 300 -y 100:100 -l puredb:/etc/pure-ftpd/pureftpd.pdb \
                     -E -j -R -P ${ADVERTISED_HOST} -p ${PORT_RANGE} \
                     -s -A -j -Z -H -4 -E -R -G -X -x \
-                    -d -d -O w3c:/var/log/pure-ftpd/transfer.log
+                    -d -O w3c:/var/log/pure-ftpd/transfer.log
